@@ -1,0 +1,18 @@
+spin_manifest_version = 2
+
+[application]
+name = "enode_test_spin"
+version = "0.1.0"
+authors = ["michham"]
+description = "Enode & Spin"
+
+[[trigger.http]]
+route = "/enox/flow/enode/..."
+component = "enode-test-spin"
+
+[component.enode-test-spin]
+source = "target/wasm32-wasi/release/enode_test_spin.wasm"
+allowed_outbound_hosts = []
+[component.enode-test-spin.build]
+command = "cargo build --target wasm32-wasi --release"
+watch = ["src/**/*.rs", "Cargo.toml"]
