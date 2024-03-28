@@ -6,13 +6,17 @@ version = "0.1.0"
 authors = ["michham"]
 description = "Enode & Spin"
 
+[application.trigger.http]
+base = "/enox/flow"
+
 [[trigger.http]]
-route = "/enox/flow/enode/..."
+route = "/enode/..."
 component = "enode-test-spin"
 
 [component.enode-test-spin]
 source = "target/wasm32-wasi/release/enode_test_spin.wasm"
-allowed_outbound_hosts = []
+environment = { CLIENT_ID = "24579d6c-9cef-48b3-a70e-43c872e1def5", CLIENT_SECRET = "a65aa7455ab7d3f51a8b25ec3ca50907ff43191d", OAUTH_URL = "https://oauth.sandbox.enode.io/oauth2/token", API_URL = "https://enode-api.sandbox.enode.io/" }
+allowed_outbound_hosts = ["http://httpbin.org", "https://oauth.sandbox.enode.io", "https://enode-api.sandbox.enode.io"]
 [component.enode-test-spin.build]
 command = "cargo build --target wasm32-wasi --release"
 watch = ["src/**/*.rs", "Cargo.toml"]

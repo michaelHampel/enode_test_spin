@@ -1,0 +1,8 @@
+apiVersion: core.spinoperator.dev/v1alpha1
+kind: SpinApp
+metadata:
+  name: enode-test-spin-79
+spec:
+  image: "ttl.sh/enode-test-spin-79"
+  executor: containerd-shim-spin
+  replicas: 2
