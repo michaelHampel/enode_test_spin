@@ -1,61 +1,88 @@
-use spin_sdk::http::{IntoResponse, Method, Request, Response, Router};
+use spin_sdk::http::{Request, IntoResponse};
 use spin_sdk::http_component;
+use api::Api;
+
+mod enode_handlers;
+mod models;
+mod repository;
+mod test_api;
+mod api;
+
 
 /// A simple Spin HTTP component.
 #[http_component]
-async fn handle_hello_spin_rust(req: Request) -> Response {
+fn handle_enode_test_spin(req: Request) -> anyhow::Result<impl IntoResponse> {
     println!("Handling request to {:?}", req.header("spin-full-url"));
 
-    let o_auth_url = std::env::var("OAUTH_URL").unwrap();
-    println!("Env OAuth_Urln loaded: {}", o_auth_url);
+    let api = Api::default();
+    api.handle(req)   
+}
 
 
-    let mut router = Router::new();
-    router.get_async("enox/flow/enode/httpbin", api::httpbin);
-    router.get("enox/flow/enode/test", api::test);
-    router.get_async("/*", api::echo_wildcard);
 
-    router.handle(req)
+
+
+/*
+
+
+#[derive(Debug, Default)]
+struct TokenRepo {
+    user_token: Option<EnodeTokenResponse>
+}
+
+impl TokenRepo {
+    pub fn init() -> Self {
+        Self {
+            user_token: None
+        }
+    }
     
-}
+    fn upd(self) {
+        TOKEN_REPO.with(|t| *t.write().unwrap() = Arc::new(self))
+    }
 
-mod api {
-    use spin_sdk::http::Params;
+    pub fn get() -> Arc<TokenRepo> {
+        TOKEN_REPO.with(|t| t.read().unwrap().clone())
+    }
 
-    use super::*;
-
-    pub fn test(_req:Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
-        
-        Ok(Response::builder()
-        .status(200)
-        .header("content-type", "text/plain")
-        .body("Hello, Fermyon")
-        .build())
+    pub fn update(&mut self, token: EnodeTokenResponse) {
+        println!("[update] old token: {:#?}", self.user_token);
+        self.user_token = Some(token);
+        println!("[update] updated token: {:#?}", self.user_token);
 
     }
 
-    pub async fn httpbin(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
-        let out_req = Request::builder()
-        .method(Method::Get)
-        .uri("http://httpbin.org/get")
-        .build();
-
-        let resp: Response =  spin_sdk::http::send(out_req).await?;
-
-        println!("Http Get Status: {}", resp.status());
-        resp.headers()
-            .for_each(|x| println!("Header: {:#?}", x));
-
-        let body_str = String::from_utf8(resp.body().to_vec());
-        println!("Response body from httpbin: \n{:#?}", body_str);
-
-        Ok(Response::new(200, body_str.unwrap()))
+    pub async fn get_token(&mut self) -> anyhow::Result<EnodeTokenResponse> {
+        match &self.user_token {
+            Some(token) => {
+                println!("Found token!!");
+                return Ok(token.clone())
+            },
+            None => {
+                println!("No access_token - query new one!!");
+                let enode_token = api::query_token().await?;
+                self.update(enode_token.clone());
+                return Ok(enode_token)   
+            },   
+        }
     }
 
-    pub async fn echo_wildcard(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
-        let capture = params.wildcard().unwrap_or_default();
-        Ok(Response::new(200, capture.to_string()))
-    }
+    
+}*/
 
+// static TOKEN_REPO: Mutex<TokenRepo> = Mutex::new(TokenRepo { user_token: None });
 
-}
+/*let token_str = match TokenRepo::get().user_token.clone() {
+            Some(token) => {
+                println!("Found token!!");
+                token.header_str()
+            },
+            None => {
+                println!("No access_token - query new one!!");
+                let enode_token = api::query_token().await?;
+                TokenRepo::upd(TokenRepo { user_token: Some(enode_token.clone())});
+                enode_token.header_str() 
+            },       
+        };*/
+
+// let token_str: String = TOKEN_REPO.lock().unwrap().get_token().await?.header_str();

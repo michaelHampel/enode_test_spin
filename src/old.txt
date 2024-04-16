@@ -1,0 +1,201 @@
+use spin_sdk::http::{Request, Response, Router};
+use spin_sdk::http_component;
+
+mod enode_handlers;
+mod models;
+mod repository;
+mod test_api;
+
+
+/// A simple Spin HTTP component.
+#[http_component]
+fn handle_enode_test_spin(req: Request) -> Response {
+    println!("Handling request to {:?}", req.header("spin-full-url"));
+
+    let mut router = Router::new();
+    router.get_async("enox/flow/enode/linkurl", enode_handlers::link_resource);
+    router.get_async("enox/flow/enode/users/:userId", enode_handlers::get_user);
+    router.get_async("enox/flow/enode/users/:userId/vehicles", enode_handlers::get_user_vehicles);
+    router.get_async("enox/flow/enode/vehicles", enode_handlers::get_vehicles);
+    router.get_async("enox/flow/enode/vehicles/:vehicleId", enode_handlers::get_vehicle);
+    router.get_async("enox/flow/enode/httpbin", test_api::httpbin);
+    router.get("enox/flow/enode/test", test_api::test);
+    router.get_async("enox/flow/enode/testdb", test_api::test_db);
+    router.get_async("/*", test_api::echo_wildcard);
+
+    router.handle(req)
+    
+}
+
+
+use spin_sdk::http::{IntoResponse, Request, Response};
+use spin_sdk::{ http_component, http_router };
+
+mod enode_handlers;
+mod models;
+mod repository;
+mod test_api;
+
+
+/// A simple Spin HTTP component.
+#[http_component]
+fn handle_enode_test_spin(req: Request) -> impl IntoResponse {
+    println!("Handling request to {:?}", req.header("spin-full-url"));
+
+    let router = http_router! {
+        GET "enox/flow/enode/linkurl" => enode_handlers::link_resource,
+        GET "/hello/:planet" => api::hello_planet,
+        _   "/*"             => |_req: Request, params| {
+            let capture = params.wildcard().unwrap_or_default();
+            Response::new(200, capture.to_string())
+        }
+    };
+
+    router.handle(req)
+    
+}
+
+mod api {
+    use spin_sdk::http::Params;
+
+    use super::*;
+
+    // /hello/:planet
+    pub fn hello_planet(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+        let planet = params.get("planet").expect("PLANET");
+
+        Ok(Response::new(200, planet.to_string()))
+    }
+}
+
+
+
+
+
+
+
+
+
+
+tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Hello, world!");
+
+    let client = reqwest::Client::builder().build()?;
+
+    let res = client
+        .get("http://httpbin.org/get")
+        .send()
+        .await?;
+    
+    println!("Http Status: {}", res.status());
+    println!("Headers: \n{:#?}", res.headers());
+
+    let body = res.text().await?;
+    println!("Response body: \n{}", body);
+
+    /*let mut headers = header::HeaderMap::new();
+    headers.insert("Content-Type", "application/x-www-form-urlencoded".parse().unwrap());
+
+    let oauth_res = client.post("https://oauth.sandbox.enode.io/oauth2/token")
+        .basic_auth("944142e9-20c0-4102-9bb8-d19f25ae7237", Some("8d9696f32d13d1cdfc309f9be24814c949636f96"))
+        .headers(headers)
+        .body("grant_type=client_credentials")
+        .send()
+        .await?;
+
+    let token_response = oauth_res.text().await?;
+
+    println!("Token response: {}", token_response);*/
+
+    /*let mut auth_client = Client::new(
+        "944142e9-20c0-4102-9bb8-d19f25ae7237",
+        Url::parse("https://oauth.sandbox.enode.io/oauth2/token")?,
+        Url::parse("https://oauth.sandbox.enode.io/oauth2/token")?
+    );
+
+    auth_client.set_client_secret("8d9696f32d13d1cdfc309f9be24814c949636f96");
+
+    let standard_token = auth_client.exchange_client_credentials()
+      .with_client(&client)
+      .execute::<StandardToken>()
+      .await?;
+
+    println!("Received StandardToken: {:#?}", standard_token);
+
+    let access_token = standard_token.access_token();
+    println!("AccessToken: {}", access_token.to_string());
+
+    let auth_header = format!("{} {}", "Bearer", access_token.to_string());
+
+    println!("Send Auth_header: {}", auth_header);
+
+    let mut headers = header::HeaderMap::new();
+    headers.insert("Content-Type", "application/json".parse().unwrap());
+    headers.insert("Authorization", auth_header.parse().unwrap());
+
+    
+    let link_req = LinkRequest {
+        vendor: "AUDI".into(),
+        vendorType: "vehicle".into(),
+        language: "en-GB".into(),
+        scopes: vec!["vehicle:read:data".into(), "vehicle:control:charging".into()],
+        redirectUri: "myapp://integration/enode".into()
+    };
+
+    let link_res = client
+        .post("https://enode-api.sandbox.enode.io/users/enox1/link")
+        .headers(headers)
+        .json(&link_req)
+        .send()
+        .await?;
+
+    println!("Link Response status: {}", link_res.status());
+    
+    // let link_body = link_res.text().await?;
+    // println!("Link response body: {}", link_body);
+
+    let link_res = link_res
+        .json::<LinkResponse>()
+        .await?;
+    println!("Got link response - linkToken: {} linkURL: {}", link_res.linkToken, link_res.linkUrl);  
+    
+    
+    */
+
+    let auth_header = "Bearer Vqskzp-wgnp84Lw7JdGjXqSRwW0c5EK_UScnRBJvajo.KDUU_zFc4j0ib8Yadj4_2DKp2pThJ2RZBHgAqOENG6Q";
+
+    let user_res = client
+        .get("https://enode-api.sandbox.enode.io/users/enox1")
+        .header("Authorization", auth_header)
+        .send()
+        .await?;
+
+    let user_body = user_res.text().await?;
+    println!("Got user: {}", user_body);
+
+
+    
+
+
+    /*let enode_client =
+      BasicClient::new(
+        ClientId::new("944142e9-20c0-4102-9bb8-d19f25ae7237".to_string()),
+        Some(ClientSecret::new("8d9696f32d13d1cdfc309f9be24814c949636f96".to_string())),
+        AuthUrl::new(" https://oauth.sandbox.enode.io/oauth2/token".to_string())?,
+        Some(TokenUrl::new("https://oauth.sandbox.enode.io/oauth2/token".to_string())?),
+      );
+
+    let token_result = spawn_blocking(
+        move || enode_client
+            .exchange_client_credentials()
+            .request(http_client)).await?;
+
+    let response_token = token_result?;
+    let access_token = response_token.access_token().secret();
+    
+    println!("Received accessToken: {:#?}", access_token);*/
+
+    Ok(())
+
+}
