@@ -3,6 +3,7 @@ use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
 use crate::{enode_handlers::get_token, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
 
 const SANDBOX_USER_NAME: &str = "miHam1";
+const ENODE_USER_SUFFIX: &str = "_ENODE";
 
 /**
  * link a TESLA for user miHam1
@@ -51,14 +52,14 @@ pub(crate) async fn link_sandbox_bev(_req: Request, _params: Params) -> anyhow::
 }
 
 pub(crate) async fn link_user_resource(req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
-
     let Ok(link_data) = serde_json::from_slice::<ResourceLinkRequest>(req.body()) else {
         return Ok(Response::new(400, ()))
     };
-    println!("Link resource with data: {:#?}", link_data);
+    let user_id = link_data.userId.as_str();
+    println!("Link resource for user {} with data: {:#?}", user_id, link_data);
 
 
-    let link_url = std::env::var("API_URL").unwrap() + "/users/" + link_data.userId.as_str() + "/link";
+    let link_url = std::env::var("API_URL").unwrap() + "/users/" + user_id + ENODE_USER_SUFFIX  + "/link";
     println!("Link URL: {}", link_url);
 
     let Some(token) = 

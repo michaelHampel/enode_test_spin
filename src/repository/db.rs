@@ -2,12 +2,12 @@
 use anyhow::Context;
 use spin_sdk::sqlite::{Connection, Value};
 
-use crate::models::{DbSuccess, EnodeClientToken, User, UserRegistration};
+use crate::models::{EnodeClientToken, User, UserRegistration};
 
 const QUERY_ENODE_CLIENT_TOKEN: &str = "SELECT TOKEN, LIFETIME FROM enodeTokens WHERE CLIENT = ?";
 const UPSERT_ENODE_CLIENT_TOKEN: &str = "INSERT INTO enodeTokens (client, token, lifetime) VALUES(?, ?, ?) ON CONFLICT(client) DO UPDATE SET token=excluded.token, lifetime=excluded.lifetime ";
-const COMMAND_CREATE_USER: &str = "INSERT INTO USERS (EMAIL, FIRSTNAME, LASTNAME, PWD) VALUES (?,?,?,?)";
-const QUERY_USER: &str = "Select EMAIL, FIRSTNAME, LASTNAME, PWD FROM users WHERE EMAIL = ?";
+const COMMAND_CREATE_USER: &str = "INSERT INTO USERS (USERID, FIRSTNAME, LASTNAME, PWD) VALUES (?,?,?,?)";
+const QUERY_USER: &str = "Select USERID, FIRSTNAME, LASTNAME, PWD FROM users WHERE EMAIL = ?";
 
 pub(crate) fn get_client_token(client: String) -> anyhow::Result<Option<EnodeClientToken>> {
     println!("get_client_token for: {}", client);
@@ -47,27 +47,27 @@ pub(crate) fn create_user(data: UserRegistration) -> anyhow::Result<User> {
   let con = Connection::open_default()?;
 
   let params = [
-    Value::Text(data.email.clone()),
+    Value::Text(data.userId.clone()),
     Value::Text(data.first_name.clone()),
     Value::Text(data.last_name.clone()),
     Value::Text(data.pwd.clone()),
   ];
 
   con.execute(COMMAND_CREATE_USER, &params)
-  .and(Ok(User{email: data.email, first_name: data.first_name, last_name: data.last_name}))
+  .and(Ok(User{userId: data.userId, first_name: data.first_name, last_name: data.last_name}))
   .with_context(|| "Error while inserting user in DB!!")
 
 }
 
-pub(crate) fn get_user(email: String) -> anyhow::Result<Option<User>> {
-  println!("get user: {}", email);
+pub(crate) fn get_user(user_id: String) -> anyhow::Result<Option<User>> {
+  println!("get user: {}", user_id);
   let con = Connection::open_default()?;
   let params = [Value::Text(email.clone())];
   let query_result = con.execute(QUERY_USER, &params)?;
   let res = match query_result.rows().next() {
       None => None,
       Some(row) => Some(User {
-          email: email,
+          userId: user_id,
           first_name: row.get::<&str>("firstname").unwrap_or_default().to_string(),
           last_name: row.get::<&str>("lastname").unwrap_or_default().to_string(),
       }),
