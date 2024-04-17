@@ -41,3 +41,12 @@ curl -i http://127.0.0.1:3000/enox/flow/enode/vehicles/5d6f6dd3-ed02-4a21-97a9-a
 -d '{
   "action": "START"
 }'
+
+curl -i http://127.0.0.1:3000/enox/flow/enode/users/link \
+-X POST \
+-H "Content-Type: application/json" \
+-d '{
+  "userId": "yauch",
+  "vendor": "TESLA",
+  "vendorType": "vehicle"
+}'

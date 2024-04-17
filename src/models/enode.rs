@@ -42,6 +42,22 @@ pub(crate) struct LinkedVendors {
     pub isValid: bool
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+#[allow(non_snake_case)]
+pub(crate) struct EnodeUsers {
+    pub data: Vec<UserInfo>,
+    pub pagination: Pagination,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
+
+pub struct UserInfo {
+    pub id: String,
+    pub createdAt: String,
+    pub scopes: Option<Vec<String>>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct EnodeVehiclesResponse {
     pub data: Vec<EnodeVehicleResponse>,

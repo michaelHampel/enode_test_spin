@@ -1,9 +1,8 @@
 use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
 
-use crate::{enode_handlers::get_token, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
+use crate::{enode_handlers::get_token, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
 
 const SANDBOX_USER_NAME: &str = "miHam1";
-const ENODE_USER_SUFFIX: &str = "_ENODE";
 
 /**
  * link a TESLA for user miHam1
@@ -59,7 +58,7 @@ pub(crate) async fn link_user_resource(req: Request, _params: Params) -> anyhow:
     println!("Link resource for user {} with data: {:#?}", user_id, link_data);
 
 
-    let link_url = std::env::var("API_URL").unwrap() + "/users/" + user_id + ENODE_USER_SUFFIX  + "/link";
+    let link_url = std::env::var("API_URL").unwrap() + "/users/" + user_id + "/link";
     println!("Link URL: {}", link_url);
 
     let Some(token) = 
@@ -92,6 +91,29 @@ pub(crate) async fn link_user_resource(req: Request, _params: Params) -> anyhow:
     let serialized = serde_json::to_string(&enode_link_resp)?;
     Ok(Response::new(200, serialized))
     
+}
+
+pub(crate) async fn get_users(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
+    println!("Get all registered users...");
+
+    let enode_url = std::env::var("API_URL").unwrap() + "/users";
+    let Some(token) = get_token().await else {
+        return Ok(Response::new(401, String::new()))
+    };
+
+    let req = Request::builder()
+        .uri(enode_url)
+        .method(Method::Get)
+        .header("Authorization", token.header_str())
+        .build();
+
+    let resp: Response = spin_sdk::http::send(req).await?;
+    let users: EnodeUsers = serde_json::from_slice(resp.body()).unwrap();
+
+    println!("All registered users  from enode: {:#?}", users);
+
+    Ok(Response::new(200, serde_json::to_string(&users)?))
+
 }
 /**
  * Get User Info
@@ -158,4 +180,30 @@ pub(crate) async fn get_user_vehicles(_req: Request, params: Params) -> anyhow::
     println!("Got vehicles for user {}: {:#?}", user_id, vehicles);
 
     Ok(Response::new(200, serde_json::to_string(&vehicles)?))
+}
+
+pub(crate) async fn unlink_user(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+    let Some(user_id) = params.get("userId") else {
+        return Ok(Response::new(404, String::new()))
+    };
+    println!("Unlink user: {}", user_id);
+
+    let enode_url = std::env::var("API_URL").unwrap() + "/users/" + user_id;
+
+    let Some(token) = get_token().await else {
+        return Ok(Response::new(401, String::new()))
+    };
+    println!("Token str: {}", token.header_str());
+
+    let user_req = Request::builder()
+        .uri(enode_url)
+        .method(Method::Delete)
+        .header("Authorization", token.header_str())
+        .build();
+
+    let resp: Response = spin_sdk::http::send(user_req).await?;
+
+    println!("Sucessfully unlinked user: {}", user_id);
+
+    Ok(resp)
 }

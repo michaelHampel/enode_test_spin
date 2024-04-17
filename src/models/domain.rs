@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use super::EnodeLinkRequest;
 
 const DEFAULT_LANGUAGE: &str = "en-GB";
-const DEFAULT_VEHICLE_SCOPES: Vec<String> =  vec!["vehicle:read:data".to_string(), "vehicle:control:charging".to_string()];
 const ENODE_REDIRECT_URI: &str = "myapp://integration/enode";
 
 
@@ -44,7 +43,7 @@ impl ToEnodeLinkRequest for ResourceLinkRequest {
             vendor: self.vendor,
             vendorType: self.vendorType,
             language: DEFAULT_LANGUAGE.to_string(),
-            scopes: DEFAULT_VEHICLE_SCOPES,
+            scopes: vec!["vehicle:read:data".to_string(), "vehicle:control:charging".to_string(), "vehicle:read:location".to_string()],
             redirectUri: ENODE_REDIRECT_URI.to_string(),
         }
     }

@@ -62,7 +62,7 @@ pub(crate) fn create_user(data: UserRegistration) -> anyhow::Result<User> {
 pub(crate) fn get_user(user_id: String) -> anyhow::Result<Option<User>> {
   println!("get user: {}", user_id);
   let con = Connection::open_default()?;
-  let params = [Value::Text(email.clone())];
+  let params = [Value::Text(user_id.clone())];
   let query_result = con.execute(QUERY_USER, &params)?;
   let res = match query_result.rows().next() {
       None => None,

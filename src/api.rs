@@ -28,8 +28,10 @@ impl Default for Api {
         let mut router = Router::new();
         router.get_async("enox/flow/enode/users/linksandbox", enode_handlers::link_sandbox_bev);
         router.post_async("enox/flow/enode/users/link", enode_handlers::link_user_resource);
+        router.get_async("enox/flow/enode/users", enode_handlers::get_users);
         router.get_async("enox/flow/enode/users/:userId", enode_handlers::get_user);
         router.get_async("enox/flow/enode/users/:userId/vehicles", enode_handlers::get_user_vehicles);
+        router.get_async("enox/flow/enode/users/unlink/:userId", enode_handlers::unlink_user);
         router.get_async("enox/flow/enode/vehicles", enode_handlers::get_vehicles);
         router.get_async("enox/flow/enode/vehicles/:vehicleId", enode_handlers::get_vehicle);
         router.post_async("enox/flow/enode/vehicles/:vehicleId/charging", enode_handlers::charge_vehicle);
