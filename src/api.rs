@@ -1,10 +1,12 @@
 use spin_sdk::http::{Request, IntoResponse, Router};
-
-
 use std::fmt::Display;
 
 use crate::enode_handlers;
+use crate::app_handlers;
 use crate::test_api;
+use crate::cors;
+use crate::cors::WithCors;
+
 
 pub(crate) struct Api {
     router: Router,
@@ -12,7 +14,7 @@ pub(crate) struct Api {
 
 impl Api {
     pub(crate) fn handle(&self, req: Request) -> anyhow::Result<impl IntoResponse> {
-        Ok(self.router.handle(req))
+        Ok(self.router.handle(req).into_builder().with_cors().build())
     }
 }
 
@@ -26,6 +28,8 @@ impl Default for Api {
     fn default() -> Self {
         println!("Called API default...");
         let mut router = Router::new();
+        router.options("*", cors::handle_preflight);
+        router.get("enox/flow/enode/health", app_handlers::health);
         router.get_async("enox/flow/enode/users/linksandbox", enode_handlers::link_sandbox_bev);
         router.post_async("enox/flow/enode/users/link", enode_handlers::link_user_resource);
         router.get_async("enox/flow/enode/users", enode_handlers::get_users);

@@ -1,12 +1,14 @@
-use spin_sdk::http::{Request, IntoResponse};
+use spin_sdk::http::{IntoResponse, Request};
 use spin_sdk::http_component;
 use api::Api;
 
 mod enode_handlers;
+mod app_handlers;
 mod models;
 mod repository;
 mod test_api;
 mod api;
+mod cors;
 
 
 /// A simple Spin HTTP component.
@@ -16,6 +18,7 @@ fn handle_enode_test_spin(req: Request) -> anyhow::Result<impl IntoResponse> {
 
     let api = Api::default();
     api.handle(req)   
+    
 }
 
 

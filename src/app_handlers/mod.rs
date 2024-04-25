@@ -1,3 +1,3 @@
-mod registration;
+mod health;
 
-pub(crate) use registration::*;
+pub(crate) use health::*;
