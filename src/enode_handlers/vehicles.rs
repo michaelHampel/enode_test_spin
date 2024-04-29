@@ -1,6 +1,6 @@
 use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
 
-use crate::{enode_handlers::get_token, models::{Action, ActionResponse, EnodeVehicleResponse, EnodeVehiclesResponse}};
+use crate::{enode_handlers::get_token, models::{Action, ActionResponse, ActionResponseError, EnodeVehicleResponse, EnodeVehiclesResponse}};
 
 pub(crate) async fn get_vehicles(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
     let enode_vehicles_url = std::env::var("API_URL").unwrap() + "/vehicles";
@@ -82,11 +82,19 @@ pub(crate) async fn charge_vehicle(req: Request, params: Params) -> anyhow::Resu
         .build();
 
     let resp: Response = spin_sdk::http::send(action_req).await?;
-    let action_resp: ActionResponse = serde_json::from_slice(resp.body()).unwrap();
-
-    println!("Got Action response for charging: {:#?}", action_resp);
-
-    Ok(Response::new(200, serde_json::to_string(&action_resp)?))
+    match resp.status() {
+        200 => {
+            let action_resp: ActionResponse = serde_json::from_slice(resp.body()).unwrap();
+            println!("Got Action response for charging: {:#?}", action_resp);
+            return Ok(Response::new(200, serde_json::to_string(&action_resp)?))
+        }
+        code => {
+            let error_resp: ActionResponseError = serde_json::from_slice(resp.body()).unwrap();
+            println!("Got Action response for charging: {:#?}", error_resp);
+            Ok(Response::new(code.to_owned(), serde_json::to_string(&error_resp)?))
+        }
+    }
+    
 }
 
 pub(crate) async fn get_vehicle_action(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {

@@ -181,3 +181,12 @@ pub(crate) struct FailureReason {
     pub r#type: String,
     pub detail: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub(crate) struct ActionResponseError {
+    pub r#type: String,
+    pub title: String,
+    pub detail: String,
+    pub error: String,
+    pub message: String,
+}

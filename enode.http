@@ -34,9 +34,9 @@ Authorization: Bearer {{token}}
 
 @linkURL = {{linkrequest.response.body.linkUrl}}
 
-curl -i http://127.0.0.1:3000/enox/flow/enode/vehicles/5d6f6dd3-ed02-4a21-97a9-ae7e89801382/charging \
+curl -i http://127.0.0.1:3000/enox/flow/enode/vehicles/a7e07299-18db-49f3-abe6-970d676e9ea8/charging \
 -X POST \
--H "Authorization: Bearer {YOUR_ACCESS_TOKEN}" \
+-H "Authorization: Bearer 3Gfd2SkT6pS14uC4_PXPoh8V0YtLar_efjmE_WkJCZA.8aRo3-m4D0aXNrW8PN55X6wlm38J0j3c0Byd42V2c_A" \
 -H "Content-Type: application/json" \
 -d '{
   "action": "START"
@@ -49,4 +49,14 @@ curl -i http://127.0.0.1:3000/enox/flow/enode/users/link \
   "userId": "yauch",
   "vendor": "TESLA",
   "vendorType": "vehicle"
+}'
+
+
+
+curl -i https://enode-api.sandbox.enode.io/vehicles/a7e07299-18db-49f3-abe6-970d676e9ea8/charging \
+-X POST \
+-H "Authorization: Bearer 3Gfd2SkT6pS14uC4_PXPoh8V0YtLar_efjmE_WkJCZA.8aRo3-m4D0aXNrW8PN55X6wlm38J0j3c0Byd42V2c_A" \
+-H "Content-Type: application/json" \
+-d '{
+  "action": "START"
 }'
