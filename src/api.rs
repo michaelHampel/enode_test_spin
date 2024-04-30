@@ -1,11 +1,35 @@
-use spin_sdk::http::{Request, IntoResponse, Router};
+use spin_sdk::variables;
+use spin_sdk::http::{IntoResponse, Request, Response, Router};
+use spin_contrib_http::cors::{
+    CorsConfig, CorsResponseBuilder, CorsRouter, ALL_HEADERS, ALL_METHODS, NO_ORIGINS
+};
 use std::fmt::Display;
 
 use crate::enode_handlers;
 use crate::app_handlers;
 use crate::test_api;
-use crate::cors;
-use crate::cors::WithCors;
+
+pub(crate) fn load_cors_config() -> CorsConfig {
+    CorsConfig::new(
+        variables::get("cors_allowed_origins").unwrap_or(NO_ORIGINS.into()),
+        variables::get("cors_allowed_methods").unwrap_or(ALL_METHODS.into()),
+        variables::get("cors_allowed_headers").unwrap_or(ALL_HEADERS.into()),
+        variables::get("cors_allow_credentials")
+            .unwrap_or("true".to_string())
+            .parse()
+            .unwrap_or(true),
+        variables::get("cors_max_age")
+            .ok()
+            .and_then(|v| v.parse::<u32>().ok()),
+    )
+}
+
+pub(crate) fn error_response(req: &Request, status: u16) -> anyhow::Result<Response> {
+    return Ok(Response::builder()
+                .status(status)
+                .body(String::new())
+                .build_with_cors(&req, &load_cors_config()))
+}
 
 
 pub(crate) struct Api {
@@ -14,7 +38,7 @@ pub(crate) struct Api {
 
 impl Api {
     pub(crate) fn handle(&self, req: Request) -> anyhow::Result<impl IntoResponse> {
-        Ok(self.router.handle(req).into_builder().with_cors().build())
+        Ok(self.router.handle(req))
     }
 }
 
@@ -27,8 +51,9 @@ impl Display for Api {
 impl Default for Api {
     fn default() -> Self {
         println!("Called API default...");
-        let mut router = Router::new();
-        router.options("*", cors::handle_preflight);
+        let cors_cfg = load_cors_config();
+        let mut router = Router::default();
+        router.register_options_handler(cors_cfg);
         router.get("enox/flow/enode/health", app_handlers::health);
         router.get_async("enox/flow/enode/users/linksandbox", enode_handlers::link_sandbox_bev);
         router.post_async("enox/flow/enode/users/link", enode_handlers::link_user_resource);

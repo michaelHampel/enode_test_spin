@@ -60,3 +60,7 @@ curl -i https://enode-api.sandbox.enode.io/vehicles/a7e07299-18db-49f3-abe6-970d
 -d '{
   "action": "START"
 }'
+
+curl -i https://enode-api.sandbox.enode.io/vehicles/a7e07299 \
+-X GET \
+-H "Authorization: Bearer Nma3DXOhIsX9YSD0nLYb9nYxXBnZZti3jpWrQwFb3R0.9UXwxjXAB4lD-Z1FgNCZFIQVnBFOL8t2A8YbHsFsPfM" 

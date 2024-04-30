@@ -8,7 +8,7 @@ mod models;
 mod repository;
 mod test_api;
 mod api;
-mod cors;
+
 
 
 /// A simple Spin HTTP component.

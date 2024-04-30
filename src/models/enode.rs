@@ -183,7 +183,7 @@ pub(crate) struct FailureReason {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct ActionResponseError {
+pub(crate) struct EnodeResponseError {
     pub r#type: String,
     pub title: String,
     pub detail: String,

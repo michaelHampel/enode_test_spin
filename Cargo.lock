@@ -106,6 +106,7 @@ dependencies = [
  "chrono",
  "serde",
  "serde_json",
+ "spin-contrib-http",
  "spin-sdk",
  "uuid",
 ]
@@ -482,6 +483,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29ef1a0fa1e39ac22972c8db23ff89aea700ab96aa87114e1fb55937a631a0c9"
 dependencies = [
  "smallvec",
+]
+
+[[package]]
+name = "spin-contrib-http"
+version = "0.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "088b705fd850a73b0fef7ea97d9b74950a0d9feaf19bc97da219f5b47757f564"
+dependencies = [
+ "anyhow",
+ "http",
+ "spin-sdk",
 ]
 
 [[package]]

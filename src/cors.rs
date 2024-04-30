@@ -1,7 +1,7 @@
-use std::fmt::Display;
+/*use std::fmt::Display;
 
 use spin_sdk::{
-    http::{self, IntoResponse, Params, Request, Response, ResponseBuilder},
+    http::{IntoResponse, Params, Request, Response, ResponseBuilder},
     variables,
 };
 
@@ -155,4 +155,4 @@ impl WithCors for ResponseBuilder {
         }
         self
     }
-}
+}*/
