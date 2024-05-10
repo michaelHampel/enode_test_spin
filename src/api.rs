@@ -1,3 +1,4 @@
+use spin_contrib_http::request::Contrib;
 use spin_sdk::variables;
 use spin_sdk::http::{IntoResponse, Request, Response, Router};
 use spin_contrib_http::cors::{
@@ -24,13 +25,6 @@ pub(crate) fn load_cors_config() -> CorsConfig {
     )
 }
 
-pub(crate) fn error_response(req: &Request, status: u16) -> anyhow::Result<Response> {
-    return Ok(Response::builder()
-                .status(status)
-                .body(String::new())
-                .build_with_cors(&req, &load_cors_config()))
-}
-
 
 pub(crate) struct Api {
     router: Router,
@@ -38,7 +32,12 @@ pub(crate) struct Api {
 
 impl Api {
     pub(crate) fn handle(&self, req: Request) -> anyhow::Result<impl IntoResponse> {
-        Ok(self.router.handle(req))
+        let method = &req.method().clone();
+        let origin = req.get_header_value_as_string("origin");
+        Ok(self.router
+            .handle(req)
+            .into_builder()
+            .build_with_cors(method, origin,  &load_cors_config()))
     }
 }
 
@@ -53,7 +52,7 @@ impl Default for Api {
         println!("Called API default...");
         let cors_cfg = load_cors_config();
         let mut router = Router::default();
-        router.register_options_handler(cors_cfg);
+        router.register_options_handler(&cors_cfg);
         router.get("enox/flow/enode/health", app_handlers::health);
         router.get_async("enox/flow/enode/users/linksandbox", enode_handlers::link_sandbox_bev);
         router.post_async("enox/flow/enode/users/link", enode_handlers::link_user_resource);

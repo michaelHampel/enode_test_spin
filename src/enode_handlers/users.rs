@@ -1,20 +1,18 @@
 use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
-use spin_contrib_http::cors::CorsResponseBuilder;
-use crate::{api::{error_response, load_cors_config}, enode_handlers::get_token, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
+use crate::{enode_handlers::get_token, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
 
 const SANDBOX_USER_NAME: &str = "miHam1";
 
 /**
  * link a TESLA for user miHam1
  */
-pub(crate) async fn link_sandbox_bev(req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
+pub(crate) async fn link_sandbox_bev(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
 
     let link_url = std::env::var("API_URL").unwrap() + "/users/" + SANDBOX_USER_NAME + "/link";
     println!("Link URL: {}", link_url);
 
-    let Some(token) = 
-        get_token().await else {
-        return error_response(&req, 401)
+    let Some(token) = get_token().await else {
+        return Ok(Response::new(401, "No valid token!!"))
     };
 
     println!("Token str: {}", token.header_str());
@@ -46,15 +44,13 @@ pub(crate) async fn link_sandbox_bev(req: Request, _params: Params) -> anyhow::R
     println!("json Link Response body from enode: \n{:#?}", enode_link_resp);
 
     let serialized = serde_json::to_string(&enode_link_resp)?;
-    Ok(Response::new(200, serialized)
-        .into_builder()
-        .build_with_cors(&req, &load_cors_config()))
+    Ok(Response::new(200, serialized))
     
 }
 
 pub(crate) async fn link_user_resource(req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
     let Ok(link_data) = serde_json::from_slice::<ResourceLinkRequest>(req.body()) else {
-        return error_response(&req, 404)
+        return Ok(Response::new(401, "Invalid data!!"))
     };
     let user_id = link_data.userId.as_str();
     println!("Link resource for user {} with data: {:#?}", user_id, link_data);
@@ -64,7 +60,7 @@ pub(crate) async fn link_user_resource(req: Request, _params: Params) -> anyhow:
     println!("Link URL: {}", link_url);
 
     let Some(token) = get_token().await else {
-        return error_response(&req, 401)
+        return Ok(Response::new(401, "No valid token!!"))
     };
 
     println!("Token str: {}", token.header_str());
@@ -90,18 +86,16 @@ pub(crate) async fn link_user_resource(req: Request, _params: Params) -> anyhow:
     println!("json Link Response body from enode: \n{:#?}", enode_link_resp);
 
     let serialized = serde_json::to_string(&enode_link_resp)?;
-    Ok(Response::new(200, serialized)
-        .into_builder()
-        .build_with_cors(&req, &load_cors_config()))
+    Ok(Response::new(200, serialized))
     
 }
 
-pub(crate) async fn get_users(req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
+pub(crate) async fn get_users(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
     println!("Get all registered users...");
 
     let enode_url = std::env::var("API_URL").unwrap() + "/users";
     let Some(token) = get_token().await else {
-        return error_response(&req, 401)
+        return Ok(Response::new(401, "No valid token!!"))
     };
 
     let get_req = Request::builder()
@@ -115,17 +109,15 @@ pub(crate) async fn get_users(req: Request, _params: Params) -> anyhow::Result<i
 
     println!("All registered users  from enode: {:#?}", users);
 
-    Ok(Response::new(200, serde_json::to_string(&users)?)
-        .into_builder()
-        .build_with_cors(&req, &load_cors_config()))
+    Ok(Response::new(200, serde_json::to_string(&users)?))
 
 }
 /**
  * Get User Info
  */
-pub(crate) async fn get_user(req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+pub(crate) async fn get_user(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
     let Some(user_id) = params.get("userId") else {
-        return error_response(&req, 404)
+        return Ok(Response::new(404, "No userID!!"))
     };
     println!("Fetch user info for: {}", user_id);
 
@@ -137,9 +129,8 @@ pub(crate) async fn get_user(req: Request, params: Params) -> anyhow::Result<imp
         return Ok(Response::new(401, String::new()))
     };*/
 
-    let Some(token) = 
-        get_token().await else {
-            return error_response(&req, 401)
+    let Some(token) = get_token().await else {
+        return Ok(Response::new(401, "No valid token!!"))
     };
     println!("Token str: {}", token.header_str());
 
@@ -154,25 +145,22 @@ pub(crate) async fn get_user(req: Request, params: Params) -> anyhow::Result<imp
 
     println!("Got linked user from enode: {:#?}", linked_user);
 
-    Ok(Response::new(200, serde_json::to_string(&linked_user)?)
-        .into_builder()
-        .build_with_cors(&req, &load_cors_config()))
+    Ok(Response::new(200, serde_json::to_string(&linked_user)?))
 }
 
 /**
  * get linked vehcles for an user
  */
-pub(crate) async fn get_user_vehicles(req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+pub(crate) async fn get_user_vehicles(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
     let Some(user_id) = params.get("userId") else {
-        return error_response(&req, 404)
+        return Ok(Response::new(404, "No userID!!"))
     };
     println!("Fetch vehicles for user: {}", user_id);
 
     let enode_url = std::env::var("API_URL").unwrap() + "/users/" + user_id + "/vehicles";
 
-    let Some(token) = 
-        get_token().await else {
-            return error_response(&req, 401)
+    let Some(token) = get_token().await else {
+        return Ok(Response::new(401, "No valid token!!"))
     };
     println!("Token str: {}", token.header_str());
 
@@ -188,22 +176,19 @@ pub(crate) async fn get_user_vehicles(req: Request, params: Params) -> anyhow::R
 
     println!("Got vehicles for user {}: {:#?}", user_id, vehicles);
 
-    Ok(Response::new(200, serde_json::to_string(&vehicles)?)
-        .into_builder()
-        .build_with_cors(&req, &load_cors_config()))
+    Ok(Response::new(200, serde_json::to_string(&vehicles)?))
 }
 
 pub(crate) async fn unlink_user(req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
     let Some(user_id) = params.get("userId") else {
-        return error_response(&req, 404)
+        return Ok(Response::new(401, "No userID!!"))
     };
     println!("Unlink user: {}", user_id);
 
     let enode_url = std::env::var("API_URL").unwrap() + "/users/" + user_id;
 
-    let Some(token) = 
-        get_token().await else {
-            return error_response(&req, 401)
+    let Some(token) = get_token().await else {
+        return Ok(Response::new(401, "No valid token!!"))
     };
     println!("Token str: {}", token.header_str());
 
@@ -217,5 +202,5 @@ pub(crate) async fn unlink_user(req: Request, params: Params) -> anyhow::Result<
 
     println!("Sucessfully unlinked user: {}", user_id);
 
-    Ok(resp.into_builder().build_with_cors(&req, &load_cors_config()))
+    Ok(resp)
 }
