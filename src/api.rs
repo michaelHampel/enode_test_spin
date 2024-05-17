@@ -1,6 +1,6 @@
 use spin_contrib_http::request::Contrib;
 use spin_sdk::variables;
-use spin_sdk::http::{IntoResponse, Request, Response, Router};
+use spin_sdk::http::{IntoResponse, Request, Router};
 use spin_contrib_http::cors::{
     CorsConfig, CorsResponseBuilder, CorsRouter, ALL_HEADERS, ALL_METHODS, NO_ORIGINS
 };

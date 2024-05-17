@@ -1,31 +1,14 @@
 
 use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
 
-use crate::{enode_handlers::get_token, models::{Action, ActionResponse, EnodeResponseError, EnodeVehicleResponse, EnodeVehiclesResponse}};
+use crate::{enode_handlers::{enode_http_get, get_token}, models::{Action, ActionResponse, EnodeResponseError, EnodeVehicleResponse, EnodeVehiclesResponse}};
 
 pub(crate) async fn get_vehicles(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
-    let enode_vehicles_url = std::env::var("API_URL").unwrap() + "/vehicles";
+    println!("Fetch all vehicle infos from enode...");
 
-    let Some(token) = get_token().await else {
-        return Ok(Response::new(401, "No valid token!!"))
-
-    };
-    println!("Token str: {}", token.header_str());
-
-    let vehicles_req = Request::builder()
-        .uri(enode_vehicles_url)
-        .method(Method::Get)
-        .header("Authorization", token.header_str())
-        .build();
-
-    let vehicles_resp: Response = spin_sdk::http::send(vehicles_req).await?;
-    let vehicles: EnodeVehiclesResponse = serde_json::from_slice(vehicles_resp.body()).unwrap();
-
-    println!("Got vehicles from enode: {:#?}", vehicles);
-
-    Ok(Response::new(vehicles_resp.status().to_owned(), serde_json::to_string(&vehicles)?))
+    let enode_uri = "/vehicles";
+    Ok(enode_http_get::<EnodeVehiclesResponse>(&enode_uri).await?)
 }
-
 
 pub(crate) async fn get_vehicle(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
     let Some(vehicle_id) = params.get("vehicleId") else {
