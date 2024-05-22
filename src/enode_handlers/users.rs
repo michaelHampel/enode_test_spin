@@ -1,6 +1,6 @@
 
 use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
-use crate::{enode_handlers::{enode_http_get, get_token}, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
+use crate::{enode_handlers::{enode_http_delete, enode_http_get, enode_http_post, get_token}, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
 
 const SANDBOX_USER_NAME: &str = "miHam1";
 
@@ -57,37 +57,13 @@ pub(crate) async fn link_user_resource(req: Request, _params: Params) -> anyhow:
     println!("Link resource for user {} with data: {:#?}", user_id, link_data);
 
 
-    let link_url = std::env::var("API_URL").unwrap() + "/users/" + user_id + "/link";
-    println!("Link URL: {}", link_url);
+    let enode_uri = "/users/".to_string() + user_id + "/link";
+    println!("Link URI: {}", enode_uri);
 
-    let Some(token) = get_token().await else {
-        return Ok(Response::new(401, "No valid token!!"))
-    };
-
-    println!("Token str: {}", token.header_str());
-
-    let link_body = link_data.to_enode();
-
-    let json_body = serde_json::to_string(&link_body)?;
+    let json_body = serde_json::to_string(&link_data.to_enode())?;
     println!("Send link body: {}", json_body);
 
-    let link_req = Request::builder()
-        .uri(link_url)
-        .method(Method::Post)
-        .header("Authorization", token.header_str())
-        .header("Content-Type", "application/json")
-        .body(json_body)
-        .build();
-
-
-    let link_resp: Response = spin_sdk::http::send(link_req).await?;
-    println!("Link Response status: {}", link_resp.status());
-  
-    let enode_link_resp: EnodeLinkResponse = serde_json::from_slice(link_resp.body()).unwrap();
-    println!("json Link Response body from enode: \n{:#?}", enode_link_resp);
-
-    let serialized = serde_json::to_string(&enode_link_resp)?;
-    Ok(Response::new(200, serialized))
+    Ok(enode_http_post::<EnodeLinkResponse>(&enode_uri, json_body).await?)
     
 }
 
@@ -130,22 +106,7 @@ pub(crate) async fn unlink_user(_req: Request, params: Params) -> anyhow::Result
     };
     println!("Unlink user: {}", user_id);
 
-    let enode_url = std::env::var("API_URL").unwrap() + "/users/" + user_id;
+    let enode_uri = "/users/".to_string() + user_id;
 
-    let Some(token) = get_token().await else {
-        return Ok(Response::new(401, "No valid token!!"))
-    };
-    println!("Token str: {}", token.header_str());
-
-    let user_req = Request::builder()
-        .uri(enode_url)
-        .method(Method::Delete)
-        .header("Authorization", token.header_str())
-        .build();
-
-    let resp: Response = spin_sdk::http::send(user_req).await?;
-
-    println!("Sucessfully unlinked user: {}", user_id);
-
-    Ok(resp)
+    Ok(enode_http_delete(&enode_uri).await?)
 }
