@@ -138,3 +138,13 @@ pub(crate) async fn list_user_locations(_req: Request, params: Params) -> anyhow
     let enode_uri = "/users/".to_string() + user_id + "/locations";
     Ok(enode_http_get::<UserLocationsResponse>(&enode_uri).await?)
 }
+
+pub(crate) async fn list_user_chargers(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+    let Some(user_id) = params.get("userId") else {
+        return Ok(Response::new(404, "No userID!!"))
+    };
+    println!("Fetch locations for: {}", user_id);
+
+    let enode_uri = "/users/".to_string() + user_id + "/locations";
+    Ok(enode_http_get::<UserLocationsResponse>(&enode_uri).await?)
+}

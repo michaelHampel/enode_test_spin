@@ -1,7 +1,7 @@
 
-use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
+use spin_sdk::http::{IntoResponse, Params, Request, Response};
 
-use crate::{enode_handlers::{enode_http_get, enode_http_post, get_token}, models::{Action, ActionResponse, EnodeResponseError, EnodeVehicleResponse, EnodeVehiclesResponse}};
+use crate::{enode_handlers::{enode_http_get, enode_http_post}, models::{Action, ActionResponse, EnodeVehicleResponse, EnodeVehiclesResponse}};
 
 pub(crate) async fn get_vehicles(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
     println!("Fetch all vehicle infos from enode...");
