@@ -54,16 +54,31 @@ impl Default for Api {
         let mut router = Router::default();
         router.register_options_handler(&cors_cfg);
         router.get("enox/flow/enode/health", app_handlers::health);
+
+        // users routes
         router.get_async("enox/flow/enode/users/linksandbox", enode_handlers::link_sandbox_bev);
         router.post_async("enox/flow/enode/users/link", enode_handlers::link_user_resource);
         router.get_async("enox/flow/enode/users", enode_handlers::get_users);
         router.get_async("enox/flow/enode/users/:userId", enode_handlers::get_user);
         router.get_async("enox/flow/enode/users/:userId/vehicles", enode_handlers::get_user_vehicles);
-        router.get_async("enox/flow/enode/users/unlink/:userId", enode_handlers::unlink_user);
+        router.get_async("enox/flow/enode/users/:userId/vehicles", enode_handlers::get_user_vehicles);
+        router.post_async("enox/flow/enode/users/:userId/locations", enode_handlers::create_user_location);
+        router.get_async("enox/flow/enode/users/:userId/locations", enode_handlers::list_user_locations);
+
+        //vehicles routes
         router.get_async("enox/flow/enode/vehicles", enode_handlers::get_vehicles);
         router.get_async("enox/flow/enode/vehicles/:vehicleId", enode_handlers::get_vehicle);
         router.post_async("enox/flow/enode/vehicles/:vehicleId/charging", enode_handlers::charge_vehicle);
         router.get_async("enox/flow/enode/vehicles/action/:actionId", enode_handlers::get_vehicle_action);
+
+        //location routes
+        router.get_async("enox/flow/enode/locations", enode_handlers::list_locations);
+        router.get_async("enox/flow/enode/locations/:locationId", enode_handlers::get_location);
+        router.delete_async("enox/flow/enode/locations/:locationId", enode_handlers::delete_location);
+        router.put_async("enox/flow/enode/locations/:locationId", enode_handlers::update_location);
+
+
+        //test routes
         router.get_async("enox/flow/enode/httpbin", test_api::httpbin);
         router.get("enox/flow/enode/test", test_api::test);
         router.get("enox/flow/enode/testdb", test_api::test_db);

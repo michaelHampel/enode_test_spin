@@ -1,6 +1,6 @@
 
 use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
-use crate::{enode_handlers::{enode_http_delete, enode_http_get, enode_http_post, get_token}, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest}};
+use crate::{enode_handlers::{enode_http_delete, enode_http_get, enode_http_post, get_token}, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest, UserLocation, UserLocationResponse, UserLocationsResponse}};
 
 const SANDBOX_USER_NAME: &str = "miHam1";
 
@@ -109,4 +109,32 @@ pub(crate) async fn unlink_user(_req: Request, params: Params) -> anyhow::Result
     let enode_uri = "/users/".to_string() + user_id;
 
     Ok(enode_http_delete(&enode_uri).await?)
+}
+
+pub(crate) async fn create_user_location(req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+    let Ok(location_data) = serde_json::from_slice::<UserLocation>(req.body()) else {
+        return Ok(Response::new(401, "Invalid data!!"))
+    };
+    let Some(user_id) = params.get("userId") else {
+        return Ok(Response::new(401, "No userID!!"))
+    };
+    println!("Create new location for user {} with data: {:#?}", user_id, location_data);
+
+
+    let enode_uri = "/users/".to_string() + user_id + "/locations";
+
+    let json_body = serde_json::to_string(&location_data)?;
+    println!("Send location body: {}", json_body);
+
+    Ok(enode_http_post::<UserLocationResponse>(&enode_uri, json_body).await?)  
+}
+
+pub(crate) async fn list_user_locations(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+    let Some(user_id) = params.get("userId") else {
+        return Ok(Response::new(404, "No userID!!"))
+    };
+    println!("Fetch locations for: {}", user_id);
+
+    let enode_uri = "/users/".to_string() + user_id + "/locations";
+    Ok(enode_http_get::<UserLocationsResponse>(&enode_uri).await?)
 }

@@ -12,18 +12,12 @@ where
 {
     let enode_url = std::env::var("API_URL").unwrap() + uri;
 
-    let token: String = match check_token().await {
-        Ok(t) => t,
-        Err(e) => return Ok(e)
-    };
-
     let req = Request::builder()
         .uri(enode_url)
         .method(Method::Get)
-        .header("Authorization", token)
         .build();
 
-    handle_request::<T>(req).await
+    handle_request_with_auth::<T>(req).await
 } 
 
 pub(crate) async fn enode_http_post<T>(uri: &str, body: String) -> anyhow::Result<Response> 
@@ -34,21 +28,34 @@ where
 {
     let enode_url = std::env::var("API_URL").unwrap() + uri;
 
-    let token: String = match check_token().await {
-        Ok(t) => t,
-        Err(e) => return Ok(e)
-    };
-
     let req = Request::builder()
         .uri(enode_url)
         .method(Method::Post)
-        .header("Authorization", token)
         .header("Content-Type", "application/json")
         .body(body)
         .build();
 
 
-    handle_request::<T>(req).await
+    handle_request_with_auth::<T>(req).await
+} 
+
+pub(crate) async fn enode_http_put<T>(uri: &str, body: String) -> anyhow::Result<Response> 
+where
+    T: for<'de> Deserialize<'de>,
+    T: std::fmt::Debug,
+    T: Serialize,
+{
+    let enode_url = std::env::var("API_URL").unwrap() + uri;
+
+    let req = Request::builder()
+        .uri(enode_url)
+        .method(Method::Put)
+        .header("Content-Type", "application/json")
+        .body(body)
+        .build();
+
+
+    handle_request_with_auth::<T>(req).await
 } 
 
 pub(crate) async fn enode_http_delete(uri: &str) -> anyhow::Result<Response> {
@@ -65,15 +72,23 @@ pub(crate) async fn enode_http_delete(uri: &str) -> anyhow::Result<Response> {
         .header("Authorization", token)
         .build();
 
-        Ok(spin_sdk::http::send(req).await?)
+    Ok(spin_sdk::http::send(req).await?)
 } 
 
-pub(crate) async fn handle_request<T>(req: Request) -> anyhow::Result<Response> 
+pub(crate) async fn handle_request_with_auth<T>(mut req: Request) -> anyhow::Result<Response> 
 where
     T: for<'de> Deserialize<'de>,
     T: std::fmt::Debug,
     T: Serialize,
 {
+    
+    let token: String = match check_token().await {
+        Ok(t) => t,
+        Err(e) => return Ok(e)
+    };
+
+    req.set_header("Authorization", token);
+
     let resp: Response = spin_sdk::http::send(req).await?;
 
     match serde_json::from_slice::<T>(resp.body()) {
