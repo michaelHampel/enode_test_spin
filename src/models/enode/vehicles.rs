@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use super::{Capabilities, Pagination};
+use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct EnodeVehiclesResponse {
@@ -7,7 +8,7 @@ pub(crate) struct EnodeVehiclesResponse {
     pub pagination: Pagination,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 #[allow(non_snake_case)]
 pub(crate) struct EnodeVehicleResponse {
     pub id: String,
@@ -25,7 +26,7 @@ pub(crate) struct EnodeVehicleResponse {
     pub scopes: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub(crate) struct VehicleInfo {
     pub vin: String,
     pub brand: String,
@@ -33,7 +34,7 @@ pub(crate) struct VehicleInfo {
     pub year: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 #[allow(non_snake_case)]
 pub(crate) struct VehicleChargeState {
     pub chargeTimeRemaining: Option<u32>,
@@ -50,7 +51,7 @@ pub(crate) struct VehicleChargeState {
     pub maxCurrent: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 #[allow(non_snake_case)]
 pub(crate) struct SmartChargingPolicy {
     pub deadline: Option<String>,
@@ -58,7 +59,7 @@ pub(crate) struct SmartChargingPolicy {
     pub minimumChargeLimit: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 #[allow(non_snake_case)]
 pub(crate) struct VehicleLocation {
     pub lastUpdated: Option<String>,
@@ -66,7 +67,7 @@ pub(crate) struct VehicleLocation {
     pub latitude: Option<f32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 #[allow(non_snake_case)]
 pub(crate) struct Odometer {
     pub distance: u32,

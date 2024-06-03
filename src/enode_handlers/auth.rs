@@ -36,7 +36,7 @@ async fn query_and_save_token() -> Option<EnodeClientToken> {
 
 async fn query_token() -> anyhow::Result<EnodeTokenResponse> {
     let o_auth_url = std::env::var("OAUTH_URL").unwrap();
-    println!("Env OAuth_Urln loaded: {}", o_auth_url);
+    println!("Env OAuth_Url loaded: {}", o_auth_url);
 
 
     let client_id = std::env::var("CLIENT_ID").unwrap();

@@ -1,15 +1,16 @@
 use serde::{Deserialize, Serialize};
 use super::Pagination;
+use utoipa::ToSchema;
 
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[allow(non_snake_case)]
 pub(crate) struct EnodeUser {
     pub id: String,
     pub linkedVendors: Vec<LinkedVendors>
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 #[allow(non_snake_case)]
 pub(crate) struct LinkedVendors {
     pub vendor: String,

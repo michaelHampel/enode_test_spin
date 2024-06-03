@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-
 use super::{Capability, Pagination};
 
 
@@ -50,4 +49,16 @@ pub(crate) struct ChargerCapabilities {
     pub setMaxCurrent: Capability,
     pub startCharging: Capability,
     pub stopCharging: Capability,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub(crate) struct ChargerLocation {
+    pub locationId: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[allow(non_snake_case)]
+pub(crate) struct ChargerMaxCurrent {
+    pub maxCurrent: u16,
 }

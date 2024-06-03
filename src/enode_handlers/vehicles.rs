@@ -3,13 +3,24 @@ use spin_sdk::http::{IntoResponse, Params, Request, Response};
 
 use crate::{enode_handlers::{enode_http_get, enode_http_post}, models::{Action, ActionResponse, EnodeVehicleResponse, EnodeVehiclesResponse}};
 
-pub(crate) async fn get_vehicles(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
+pub(crate) async fn list_vehicles(_req: Request, _params: Params) -> anyhow::Result<impl IntoResponse> {
     println!("Fetch all vehicle infos from enode...");
 
     let enode_uri = "/vehicles";
     Ok(enode_http_get::<EnodeVehiclesResponse>(&enode_uri).await?)
 }
 
+#[utoipa::path(
+    get,
+    path = "/vehicles/{vehicleId}",
+    responses(
+        (status = 200, description = "Vehicle found successfully", body = EnodeVehicleResponse),
+        (status = NOT_FOUND, description = "Vehicle not found")
+    ),
+    params(
+        ("vehicleId" = u64, Path, description = "VehicleId"),
+    )
+)]
 pub(crate) async fn get_vehicle(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
     let Some(vehicle_id) = params.get("vehicleId") else {
         return Ok(Response::new(404, "No vehicleID provided!!"))

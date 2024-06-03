@@ -1,6 +1,6 @@
 
 use spin_sdk::http::{IntoResponse, Method, Params, Request, Response};
-use crate::{enode_handlers::{enode_http_delete, enode_http_get, enode_http_post, get_token}, models::{EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest, UserLocation, UserLocationResponse, UserLocationsResponse}};
+use crate::{enode_handlers::{enode_http_delete, enode_http_get, enode_http_post, get_token}, models::{EnodeChargersResponse, EnodeInvertersResponse, EnodeLinkRequest, EnodeLinkResponse, EnodeUser, EnodeUsers, EnodeVehiclesResponse, ResourceLinkRequest, ToEnodeLinkRequest, UserLocation, UserLocationResponse, UserLocationsResponse}};
 
 const SANDBOX_USER_NAME: &str = "miHam1";
 
@@ -77,6 +77,17 @@ pub(crate) async fn get_users(_req: Request, _params: Params) -> anyhow::Result<
 /**
  * Get User Info
  */
+#[utoipa::path(
+    get,
+    path = "/users/{userId}",
+    responses(
+        (status = 200, description = "User found successfully", body = EnodeUser),
+        (status = NOT_FOUND, description = "User was not found")
+    ),
+    params(
+        ("userId" = u64, Path, description = "UserId"),
+    )
+)]
 pub(crate) async fn get_user(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
     let Some(user_id) = params.get("userId") else {
         return Ok(Response::new(404, "No userID!!"))
@@ -90,7 +101,7 @@ pub(crate) async fn get_user(_req: Request, params: Params) -> anyhow::Result<im
 /**
  * get linked vehcles for an user
  */
-pub(crate) async fn get_user_vehicles(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+pub(crate) async fn list_user_vehicles(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
     let Some(user_id) = params.get("userId") else {
         return Ok(Response::new(404, "No userID!!"))
     };
@@ -143,8 +154,18 @@ pub(crate) async fn list_user_chargers(_req: Request, params: Params) -> anyhow:
     let Some(user_id) = params.get("userId") else {
         return Ok(Response::new(404, "No userID!!"))
     };
-    println!("Fetch locations for: {}", user_id);
+    println!("Fetch chargers for: {}", user_id);
 
-    let enode_uri = "/users/".to_string() + user_id + "/locations";
-    Ok(enode_http_get::<UserLocationsResponse>(&enode_uri).await?)
+    let enode_uri = "/users/".to_string() + user_id + "/chargers";
+    Ok(enode_http_get::<EnodeChargersResponse>(&enode_uri).await?)
+}
+
+pub(crate) async fn list_user_inverters(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
+    let Some(user_id) = params.get("userId") else {
+        return Ok(Response::new(404, "No userID!!"))
+    };
+    println!("Fetch inverters for: {}", user_id);
+
+    let enode_uri = "/users/".to_string() + user_id + "/inverters";
+    Ok(enode_http_get::<EnodeInvertersResponse>(&enode_uri).await?)
 }

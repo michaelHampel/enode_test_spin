@@ -17,8 +17,8 @@ pub(crate) async fn get_location(_req: Request, params: Params) -> anyhow::Resul
     };
     println!("Fetch location info for: {}", location_id);
 
-    let enode_uri = "/locations";
-    Ok(enode_http_get::<UserLocationResponse>(enode_uri).await?)
+    let enode_uri = "/locations/".to_string() + location_id;
+    Ok(enode_http_get::<UserLocationResponse>(&enode_uri).await?)
 }
 
 pub(crate) async fn delete_location(_req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {
@@ -27,8 +27,8 @@ pub(crate) async fn delete_location(_req: Request, params: Params) -> anyhow::Re
     };
     println!("Delete location: {}", location_id);
 
-    let enode_uri = "/locations";
-    Ok(enode_http_delete(enode_uri).await?)
+    let enode_uri = "/locations/".to_string() + location_id;
+    Ok(enode_http_delete(&enode_uri).await?)
 }
 
 pub(crate) async fn update_location(req: Request, params: Params) -> anyhow::Result<impl IntoResponse> {

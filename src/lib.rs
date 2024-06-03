@@ -1,6 +1,8 @@
+use models::{EnodeUser, EnodeVehicleResponse};
 use spin_sdk::http::{IntoResponse, Request};
 use spin_sdk::http_component;
 use api::Api;
+use utoipa::OpenApi;
 
 mod enode_handlers;
 mod app_handlers;
@@ -10,11 +12,26 @@ mod test_api;
 mod api;
 
 
+#[derive(OpenApi)]
+#[openapi(
+    info(title = "Enode API", version = "1.0.0"),
+    paths(
+        enode_handlers::get_user,
+        enode_handlers::get_vehicle,
+    ), 
+    components(
+        schemas(EnodeUser, EnodeVehicleResponse)
+    )
+)]
+struct ApiDoc;
+
+
 
 /// A simple Spin HTTP component.
 #[http_component]
 fn handle_enode_test_spin(req: Request) -> anyhow::Result<impl IntoResponse> {
     println!("Handling request to {:?}", req.header("spin-full-url"));
+    //println!("{}", ApiDoc::openapi().to_pretty_json().unwrap());
 
     let api = Api::default();
     api.handle(req)   
@@ -26,7 +43,6 @@ fn handle_enode_test_spin(req: Request) -> anyhow::Result<impl IntoResponse> {
 
 
 /*
-
 
 #[derive(Debug, Default)]
 struct TokenRepo {
